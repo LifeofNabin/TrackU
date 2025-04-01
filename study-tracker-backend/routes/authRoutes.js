@@ -1,41 +1,46 @@
-const express = require('express');
-const multer = require('multer');
-const User = require('../models/User');
+// routes/authRoutes.js
+const express = require("express");
+const fs = require("fs");
+const path = require("path");
+const User = require("../models/User");  // Import the User model
 
 const router = express.Router();
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+let users = [];  // Temporary storage for users (can later be replaced with a database)
 
-// 📌 Register API
-router.post('/register', upload.single('image'), async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const image = req.file.buffer.toString('base64'); // Convert image to base64
+// Register route
+router.post("/register", (req, res) => {
+  const { email, password, faceData } = req.body;
+  
+  const user = new User(email, password, faceData);
+  const imageBuffer = Buffer.from(faceData, "base64");
 
-        const newUser = new User({ email, password, image });
-        await newUser.save();
+  // Save face image
+  fs.writeFileSync(path.join(__dirname, "../faces", `${user.userId}.png`), imageBuffer);
 
-        res.json({ message: 'User registered successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+  // Save user details
+  users.push(user);
+
+  res.json({ success: true, userId: user.userId });
 });
 
-// 📌 Login API (Face Comparison Placeholder)
-router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ email });
+// Login route
+router.post("/login", (req, res) => {
+  const { userId, password, faceData } = req.body;
 
-        if (!user || user.password !== password) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
+  const user = users.find((user) => user.userId === userId && user.password === password);
 
-        res.json({ message: 'Login successful', user });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+  if (!user) {
+    return res.json({ success: false, message: "Invalid credentials" });
+  }
+
+  // Face recognition logic (simplified)
+  const storedFaceData = fs.readFileSync(path.join(__dirname, "../faces", `${userId}.png`));
+  if (storedFaceData.toString("base64") !== faceData) {
+    return res.json({ success: false, message: "Face mismatch" });
+  }
+
+  res.json({ success: true });
 });
 
 module.exports = router;

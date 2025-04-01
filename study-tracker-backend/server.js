@@ -1,25 +1,41 @@
-const express = require("express");
-const cors = require("cors");
+// server.js
+const express = require('express');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const mysql = require('mysql');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const dotenv = require('dotenv');
 
+// Load environment variables from a .env file
+dotenv.config();
+
+// Initialize express app
 const app = express();
+
+// Middlewares
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-let users = [];
-
-app.post("/register", (req, res) => {
-    const { userId, name, email, password, image, timestamp } = req.body;
-    users.push({ userId, name, email, password, image, timestamp });
-    res.status(201).json({ message: "User registered successfully" });
+// MySQL connection setup
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root', // your MySQL username
+  password: '', // your MySQL password
+  database: 'study_tracker' // the database you created
 });
 
-app.get("/user-data", (req, res) => {
-    if (users.length > 0) {
-        res.json(users[users.length - 1]); // Send last registered user
-    } else {
-        res.status(404).json({ message: "No users found" });
-    }
+// Connect to MySQL
+db.connect((err) => {
+  if (err) {
+    console.error('Error connecting to database:', err);
+    return;
+  }
+  console.log('Connected to MySQL database');
 });
 
-const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
+// Server
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

@@ -1,58 +1,54 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Webcam from "react-webcam";
-import { v4 as uuidv4 } from "uuid";
+import WebcamCapture from "../components/WebcamCapture";
+import { registerUser } from "../utils/api";
 
 const Register = () => {
-    const navigate = useNavigate();
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [image, setImage] = useState(null);
-    const webcamRef = React.useRef(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [capturedImage, setCapturedImage] = useState(null);
+  const navigate = useNavigate();
 
-    // Capture Face Image
-    const capture = () => {
-        const imageSrc = webcamRef.current.getScreenshot();
-        setImage(imageSrc);
+  const handleRegister = async () => {
+    if (!name || !email || !password || !capturedImage) {
+      alert("Please fill in all fields and capture your face.");
+      return;
+    }
+
+    const userData = {
+      name,
+      email,
+      password,
+      faceData: capturedImage,
     };
 
-    // Handle Registration
-    const handleRegister = async () => {
-        const userId = uuidv4();
-        const userData = { userId, name, email, password, image };
+    try {
+      const response = await registerUser(userData);
+      if (response.success) {
+        alert("Registration successful! Your user ID is " + response.userId);
+        navigate("/login");
+      } else {
+        alert("Registration failed: " + response.message);
+      }
+    } catch (error) {
+      console.error("Error registering user:", error);
+      alert("An error occurred while registering.");
+    }
+  };
 
-        try {
-            const response = await fetch("http://localhost:5000/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(userData),
-            });
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <h2 className="text-2xl font-bold mb-4">Register</h2>
+      <input type="text" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} className="mb-2 p-2 border" />
+      <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} className="mb-2 p-2 border" />
+      <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} className="mb-2 p-2 border" />
 
-            if (response.ok) {
-                alert("Registration Successful!");
-                navigate("/dashboard");
-            } else {
-                alert("Registration Failed!");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-        }
-    };
-
-    return (
-        <div className="flex flex-col items-center p-6">
-            <h2 className="text-2xl font-bold mb-4">Register</h2>
-            <input type="text" placeholder="Name" onChange={(e) => setName(e.target.value)} className="p-2 border rounded w-80 mb-2"/>
-            <input type="email" placeholder="Email" onChange={(e) => setEmail(e.target.value)} className="p-2 border rounded w-80 mb-2"/>
-            <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} className="p-2 border rounded w-80 mb-2"/>
-            
-            <Webcam ref={webcamRef} screenshotFormat="image/jpeg" className="w-64 h-48 mb-2"/>
-            <button onClick={capture} className="px-4 py-2 bg-gray-500 text-white rounded mb-2">Capture Face</button>
-
-            <button onClick={handleRegister} className="px-6 py-2 bg-green-500 text-white rounded">Register</button>
-        </div>
-    );
+      <WebcamCapture setCapturedImage={setCapturedImage} />
+      
+      <button onClick={handleRegister} className="bg-blue-500 text-white p-2 mt-4">Register</button>
+    </div>
+  );
 };
 
 export default Register;

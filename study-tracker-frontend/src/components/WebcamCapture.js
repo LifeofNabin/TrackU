@@ -1,20 +1,21 @@
 import React, { useRef, useState } from "react";
 import Webcam from "react-webcam";
 
-const WebcamCapture = () => {
+const WebcamCapture = ({ setCapturedImage }) => {
   const webcamRef = useRef(null);
   const [image, setImage] = useState(null);
 
   const capture = () => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    setImage(imageSrc);
+    const capturedImage = webcamRef.current.getScreenshot();
+    setImage(capturedImage);
+    setCapturedImage(capturedImage);
   };
 
   return (
     <div className="flex flex-col items-center">
-      <Webcam ref={webcamRef} screenshotFormat="image/jpeg" className="w-64 h-48 border" />
-      <button onClick={capture} className="mt-2 px-4 py-2 bg-gray-500 text-white rounded">Capture Face</button>
-      {image && <img src={image} alt="Captured" className="mt-2 w-24 h-24 border rounded-full" />}
+      <Webcam ref={webcamRef} screenshotFormat="image/png" className="w-64 h-48" />
+      <button onClick={capture} className="bg-green-500 text-white p-2 mt-2">Capture Face</button>
+      {image && <img src={image} alt="Captured Face" className="w-32 h-32 mt-2 rounded-full" />}
     </div>
   );
 };

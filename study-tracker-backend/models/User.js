@@ -1,9 +1,13 @@
-const mongoose = require('mongoose');
+// models/User.js
+const { v4: uuidv4 } = require("uuid");
 
-const UserSchema = new mongoose.Schema({
-    email: String,
-    password: String,
-    image: String // Store captured face as Base64
-});
+class User {
+  constructor(email, password, faceData) {
+    this.userId = uuidv4(); // Generate unique user ID
+    this.email = email;
+    this.password = password;
+    this.faceData = faceData;
+  }
+}
 
-module.exports = mongoose.model('User', UserSchema);
+module.exports = User;

@@ -14,16 +14,72 @@ const AuthPage = () => {
 
   const capture = () => {
     const imageSrc = webcamRef.current.getScreenshot();
-    setImage(imageSrc);
+    setImage(imageSrc); // Save the captured image (base64 string)
   };
 
-  const handleAuth = () => {
+  const handleAuth = async () => {
     if (isRegister) {
-      console.log("Registering with:", { email, password, image });
+      if (!email || !password || !image) {
+        alert("Please fill in all fields and capture your face.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("email", email);
+      formData.append("password", password);
+      formData.append("faceData", image.split(",")[1]); // Send base64 image string to backend
+
+      try {
+        const response = await fetch("http://localhost:5000/register", {
+          method: "POST",
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert(`Registration successful! Your user ID is: ${data.userId}`);
+          navigate("/login");
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error("Error registering user:", error);
+        alert("An error occurred while registering.");
+      }
     } else {
-      console.log("Logging in with:", { userId, password, image });
+      // Login logic
+      if (!userId || !password || !image) {
+        alert("Please fill in all fields and capture your face.");
+        return;
+      }
+
+      const loginData = {
+        userId,
+        password,
+        faceData: image.split(",")[1], // Send face data for face recognition
+      };
+
+      try {
+        const response = await fetch("http://localhost:5000/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(loginData),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert("Login successful!");
+          navigate("/dashboard");
+        } else {
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error("Error logging in:", error);
+        alert("An error occurred while logging in.");
+      }
     }
-    navigate("/dashboard");
   };
 
   return (
