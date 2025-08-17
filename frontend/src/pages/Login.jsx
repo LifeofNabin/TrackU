@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import LoginForm from "../components/Auth/LoginForm";
-import NavBar from "./components/NavBar";
+import NavBar from "../components/NavBar";
 
 const Login = () => {
   const navigate = useNavigate();
