@@ -1,0 +1,20 @@
+# ===== FILE: /Users/nabin/TrackU/backend/.dockerignore =====
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.local
+.env.production
+.env.test
+coverage
+.nyc_output
+.DS_Store
+*.log
+logs
+.vscode
+.idea
+*.swp
+*.swo
+*~

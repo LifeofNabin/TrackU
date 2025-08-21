@@ -1,0 +1,31 @@
+// frontend/src/components/Dashboard/SessionViewer.jsx
+import { useEffect, useState } from 'react';
+import { getSessions } from '../../services/trackingService';
+
+export default function SessionViewer({ userId }) {
+  const [sessions, setSessions] = useState([]);
+
+  useEffect(() => {
+    const loadSessions = async () => {
+      const { data } = await getSessions(userId);
+      setSessions(data);
+    };
+    loadSessions();
+  }, [userId]);
+
+  return (
+    <div className="session-history">
+      <h3>Study Sessions</h3>
+      <ul>
+        {sessions.map(session => (
+          <li key={session._id}>
+            {new Date(session.startTime).toLocaleString()} - 
+            {session.endTime 
+              ? `${Math.round(session.duration / 60)} mins` 
+              : 'In progress'}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
